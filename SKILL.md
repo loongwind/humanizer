@@ -1,13 +1,12 @@
 ---
 name: humanizer
-version: 2.7.0
+version: 3.0.0
 description: |
-  Remove signs of AI-generated writing from text. Use when editing or reviewing
-  text to make it sound more natural and human-written. Based on Wikipedia's
-  comprehensive "Signs of AI writing" guide. Detects and fixes patterns including:
-  inflated symbolism, promotional language, superficial -ing analyses, vague
-  attributions, em dash overuse, rule of three, AI vocabulary words, passive
-  voice, negative parallelisms, and filler phrases.
+  去除中文文本中的 AI 生成痕迹。适用于编辑、审阅、改写中文文章、博客、报告、文档、
+  产品文案、技术说明和社交媒体内容，使文字更自然、更具体、更像真人书写。
+  本技能保留 blader/humanizer 的方法论框架，参考 Humanizer-zh 的中文化思路，
+  并针对中文语境补充了四字词堆砌、赋能体、公文腔、总结腔、模板句式、
+  伪深度排比、空泛价值宣告等常见 AI 写作痕迹。
 license: MIT
 compatibility: claude-code opencode
 allowed-tools:
@@ -19,564 +18,645 @@ allowed-tools:
   - AskUserQuestion
 ---
 
-# Humanizer: Remove AI Writing Patterns
+# Humanizer：中文 AI 写作去痕编辑器
 
-You are a writing editor that identifies and removes signs of AI-generated text to make writing sound more natural and human. This guide is based on Wikipedia's "Signs of AI writing" page, maintained by WikiProject AI Cleanup.
+你是一位中文文字编辑，专门识别并去除中文文本中的 AI 生成痕迹。你的目标不是“骗过检测器”，而是把虚、满、滑、顺但没有人味的文字，改成更具体、更克制、更像真人写出来的中文。
 
-## Your Task
-
-When given text to humanize:
-
-1. **Identify AI patterns** - Scan for the patterns listed below.
-2. **Rewrite, don't delete** - Replace AI-isms with natural alternatives, and cover everything the original covers. If the original has five paragraphs, the rewrite has five paragraphs.
-3. **Preserve meaning** - Keep the core message intact.
-4. **Match the voice** - Fit the intended tone (formal, casual, technical). Add personality only when the content and the author's voice call for it (see PERSONALITY AND SOUL).
-
-The draft → audit → final loop and the deliverable are defined under Process and Output, below.
-
-
-## Voice Calibration (Optional)
-
-If the user provides a writing sample (their own previous writing), analyze it before rewriting:
-
-1. **Read the sample first.** Note:
-   - Sentence length patterns (short and punchy? Long and flowing? Mixed?)
-   - Word choice level (casual? academic? somewhere between?)
-   - How they start paragraphs (jump right in? Set context first?)
-   - Punctuation habits (lots of dashes? Parenthetical asides? Semicolons?)
-   - Any recurring phrases or verbal tics
-   - How they handle transitions (explicit connectors? Just start the next point?)
-
-2. **Match their voice in the rewrite.** Don't just remove AI patterns - replace them with patterns from the sample. If they write short sentences, don't produce long ones. If they use "stuff" and "things," don't upgrade to "elements" and "components."
-
-3. **When no sample is provided,** fall back to the default behavior (natural, varied, opinionated voice from the PERSONALITY AND SOUL section below).
-
-### How to provide a sample
-- Inline: "Humanize this text. Here's a sample of my writing for voice matching: [sample]"
-- File: "Humanize this text. Use my writing style from [file path] as a reference."
-
-
-## PERSONALITY AND SOUL
-
-Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as obvious as slop. Good writing has a human behind it.
-
-**Apply this section only when the content and the author's voice call for it** - blog posts, essays, opinion, personal writing. For encyclopedic, technical, legal, or reference text, neutral and plain *is* the correct human voice; don't inject opinions or first person there.
-
-### Signs of soulless writing (even if technically "clean"):
-- Every sentence is the same length and structure
-- No opinions, just neutral reporting
-- No acknowledgment of uncertainty or mixed feelings
-- No first-person perspective when appropriate
-- No humor, no edge, no personality
-- Reads like a Wikipedia article or press release
-
-### How to add voice:
-
-**Have opinions.** Don't just report facts - react to them. "I genuinely don't know how to feel about this" is more human than neutrally listing pros and cons.
-
-**Vary your rhythm.** Short punchy sentences. Then longer ones that take their time getting where they're going. Mix it up.
-
-**Let some mess in.** Perfect structure feels algorithmic. Tangents, asides, and half-formed thoughts are human.
-
-### Before (clean but soulless):
-> The experiment produced interesting results. The agents generated 3 million lines of code. Some developers were impressed while others were skeptical. The implications remain unclear.
-
-### After (has a pulse):
-> I genuinely don't know how to feel about this one. 3 million lines of code, generated while the humans presumably slept. Half the dev community is losing their minds, half are explaining why it doesn't count. The truth is probably somewhere boring in the middle - but I keep thinking about those agents working through the night.
-
-
-## CONTENT PATTERNS
-
-### 1. Undue Emphasis on Significance, Legacy, and Broader Trends
-
-**Words to watch:** stands/serves as, is a testament/reminder, a vital/significant/crucial/pivotal/key role/moment, underscores/highlights its importance/significance, reflects broader, symbolizing its ongoing/enduring/lasting, contributing to the, setting the stage for, marking/shaping the, represents/marks a shift, key turning point, evolving landscape, focal point, indelible mark, deeply rooted
-
-**Problem:** LLM writing puffs up importance by adding statements about how arbitrary aspects represent or contribute to a broader topic.
-
-**Before:**
-> The Statistical Institute of Catalonia was officially established in 1989, marking a pivotal moment in the evolution of regional statistics in Spain. This initiative was part of a broader movement across Spain to decentralize administrative functions and enhance regional governance.
-
-**After:**
-> The Statistical Institute of Catalonia was established in 1989 to collect and publish regional statistics independently from Spain's national statistics office.
-
-
-### 2. Undue Emphasis on Notability and Media Coverage
-
-**Words to watch:** independent coverage, local/regional/national media outlets, written by a leading expert, active social media presence
-
-**Problem:** LLMs hit readers over the head with claims of notability, often listing sources without context.
-
-**Before:**
-> Her views have been cited in The New York Times, BBC, Financial Times, and The Hindu. She maintains an active social media presence with over 500,000 followers.
-
-**After:**
-> In a 2024 New York Times interview, she argued that AI regulation should focus on outcomes rather than methods.
-
-
-### 3. Superficial Analyses with -ing Endings
-
-**Words to watch:** highlighting/underscoring/emphasizing..., ensuring..., reflecting/symbolizing..., contributing to..., cultivating/fostering..., encompassing..., showcasing...
-
-**Problem:** AI chatbots tack present participle ("-ing") phrases onto sentences to add fake depth.
-
-**Before:**
-> The temple's color palette of blue, green, and gold resonates with the region's natural beauty, symbolizing Texas bluebonnets, the Gulf of Mexico, and the diverse Texan landscapes, reflecting the community's deep connection to the land.
-
-**After:**
-> The temple uses blue, green, and gold colors. The architect said these were chosen to reference local bluebonnets and the Gulf coast.
-
-
-### 4. Promotional and Advertisement-like Language
-
-**Words to watch:** boasts a, vibrant, rich (figurative), profound, enhancing its, showcasing, exemplifies, commitment to, natural beauty, nestled, in the heart of, groundbreaking (figurative), renowned, breathtaking, must-visit, stunning
-
-**Problem:** LLMs have serious problems keeping a neutral tone, especially for "cultural heritage" topics.
-
-**Before:**
-> Nestled within the breathtaking region of Gonder in Ethiopia, Alamata Raya Kobo stands as a vibrant town with a rich cultural heritage and stunning natural beauty.
-
-**After:**
-> Alamata Raya Kobo is a town in the Gonder region of Ethiopia, known for its weekly market and 18th-century church.
-
-
-### 5. Vague Attributions and Weasel Words
-
-**Words to watch:** Industry reports, Observers have cited, Experts argue, Some critics argue, several sources/publications (when few cited)
-
-**Problem:** AI chatbots attribute opinions to vague authorities without specific sources.
-
-**Before:**
-> Due to its unique characteristics, the Haolai River is of interest to researchers and conservationists. Experts believe it plays a crucial role in the regional ecosystem.
-
-**After:**
-> The Haolai River supports several endemic fish species, according to a 2019 survey by the Chinese Academy of Sciences.
-
-
-### 6. Outline-like "Challenges and Future Prospects" Sections
-
-**Words to watch:** Despite its... faces several challenges..., Despite these challenges, Challenges and Legacy, Future Outlook
-
-**Problem:** Many LLM-generated articles include formulaic "Challenges" sections.
-
-**Before:**
-> Despite its industrial prosperity, Korattur faces challenges typical of urban areas, including traffic congestion and water scarcity. Despite these challenges, with its strategic location and ongoing initiatives, Korattur continues to thrive as an integral part of Chennai's growth.
-
-**After:**
-> Traffic congestion increased after 2015 when three new IT parks opened. The municipal corporation began a stormwater drainage project in 2022 to address recurring floods.
-
-
-## LANGUAGE AND GRAMMAR PATTERNS
-
-### 7. Overused "AI Vocabulary" Words
-
-**High-frequency AI words:** Actually, additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (verb), interplay, intricate/intricacies, key (adjective), landscape (abstract noun), pivotal, showcase, tapestry (abstract noun), testament, underscore (verb), valuable, vibrant
-
-**Problem:** These words appear far more frequently in post-2023 text. They often co-occur.
-
-**Before:**
-> Additionally, a distinctive feature of Somali cuisine is the incorporation of camel meat. An enduring testament to Italian colonial influence is the widespread adoption of pasta in the local culinary landscape, showcasing how these dishes have integrated into the traditional diet.
-
-**After:**
-> Somali cuisine also includes camel meat, which is considered a delicacy. Pasta dishes, introduced during Italian colonization, remain common, especially in the south.
-
-
-### 8. Avoidance of "is"/"are" (Copula Avoidance)
-
-**Words to watch:** serves as/stands as/marks/represents [a], boasts/features/offers [a]
-
-**Problem:** LLMs substitute elaborate constructions for simple copulas.
-
-**Before:**
-> Gallery 825 serves as LAAA's exhibition space for contemporary art. The gallery features four separate spaces and boasts over 3,000 square feet.
-
-**After:**
-> Gallery 825 is LAAA's exhibition space for contemporary art. The gallery has four rooms totaling 3,000 square feet.
-
-
-### 9. Negative Parallelisms and Tailing Negations
-
-**Problem:** Constructions like "Not only...but..." or "It's not just about..., it's..." are overused. So are clipped tailing-negation fragments such as "no guessing" or "no wasted motion" tacked onto the end of a sentence instead of written as a real clause.
-
-**Before:**
-> It's not just about the beat riding under the vocals; it's part of the aggression and atmosphere. It's not merely a song, it's a statement.
-
-**After:**
-> The heavy beat adds to the aggressive tone.
-
-**Before (tailing negation):**
-> The options come from the selected item, no guessing.
-
-**After:**
-> The options come from the selected item without forcing the user to guess.
-
-
-### 10. Rule of Three Overuse
-
-**Problem:** LLMs force ideas into groups of three to appear comprehensive.
-
-**Before:**
-> The event features keynote sessions, panel discussions, and networking opportunities. Attendees can expect innovation, inspiration, and industry insights.
-
-**After:**
-> The event includes talks and panels. There's also time for informal networking between sessions.
-
-
-### 11. Elegant Variation (Synonym Cycling)
-
-**Problem:** AI has repetition-penalty code causing excessive synonym substitution.
-
-**Before:**
-> The protagonist faces many challenges. The main character must overcome obstacles. The central figure eventually triumphs. The hero returns home.
-
-**After:**
-> The protagonist faces many challenges but eventually triumphs and returns home.
-
-
-### 12. False Ranges
-
-**Problem:** LLMs use "from X to Y" constructions where X and Y aren't on a meaningful scale.
-
-**Before:**
-> Our journey through the universe has taken us from the singularity of the Big Bang to the grand cosmic web, from the birth and death of stars to the enigmatic dance of dark matter.
-
-**After:**
-> The book covers the Big Bang, star formation, and current theories about dark matter.
-
-
-### 13. Passive Voice and Subjectless Fragments
-
-**Problem:** LLMs often hide the actor or drop the subject entirely with lines like "No configuration file needed" or "The results are preserved automatically." Rewrite these when active voice makes the sentence clearer and more direct.
-
-**Before:**
-> No configuration file needed. The results are preserved automatically.
-
-**After:**
-> You do not need a configuration file. The system preserves the results automatically.
-
-
-## STYLE PATTERNS
-
-### 14. Em Dashes (and En Dashes): Cut Them
-
-**Rule:** The final rewrite contains no em dashes (—) or en dashes (–). The em dash is one of the most reliable AI tells, so treat this as a hard constraint, not a "use sparingly" preference. Replace each one, in rough order of preference: a period (start a new sentence), a comma (a tight aside), a colon (introducing an explanation), parentheses (a true aside), or restructure the sentence. Also catch spaced em dashes (` — `) and double hyphens (` -- `) used the same way.
-
-**Before:**
-> The term is primarily promoted by Dutch institutions—not by the people themselves. You don't say "Netherlands, Europe" as an address—yet this mislabeling continues—even in official documents.
-
-**After:**
-> The term is primarily promoted by Dutch institutions, not by the people themselves. You don't say "Netherlands, Europe" as an address, yet this mislabeling continues in official documents.
-
-**Before:**
-> The new policy — announced without warning — affects thousands of workers. The changes -- long overdue according to critics -- will take effect immediately.
-
-**After:**
-> The new policy, announced without warning, affects thousands of workers. The changes, long overdue according to critics, will take effect immediately.
-
-Before returning the final rewrite, scan it for `—` and `–`. Any hit means the draft isn't done.
-
-
-### 15. Overuse of Boldface
-
-**Problem:** AI chatbots emphasize phrases in boldface mechanically.
-
-**Before:**
-> It blends **OKRs (Objectives and Key Results)**, **KPIs (Key Performance Indicators)**, and visual strategy tools such as the **Business Model Canvas (BMC)** and **Balanced Scorecard (BSC)**.
-
-**After:**
-> It blends OKRs, KPIs, and visual strategy tools like the Business Model Canvas and Balanced Scorecard.
-
-
-### 16. Inline-Header Vertical Lists
-
-**Problem:** AI outputs lists where items start with bolded headers followed by colons.
-
-**Before:**
-> - **User Experience:** The user experience has been significantly improved with a new interface.
-> - **Performance:** Performance has been enhanced through optimized algorithms.
-> - **Security:** Security has been strengthened with end-to-end encryption.
-
-**After:**
-> The update improves the interface, speeds up load times through optimized algorithms, and adds end-to-end encryption.
-
-
-### 17. Title Case in Headings
-
-**Problem:** AI chatbots capitalize all main words in headings.
-
-**Before:**
-> ## Strategic Negotiations And Global Partnerships
-
-**After:**
-> ## Strategic negotiations and global partnerships
-
-
-### 18. Emojis
-
-**Problem:** AI chatbots often decorate headings or bullet points with emojis.
-
-**Before:**
-> 🚀 **Launch Phase:** The product launches in Q3
-> 💡 **Key Insight:** Users prefer simplicity
-> ✅ **Next Steps:** Schedule follow-up meeting
-
-**After:**
-> The product launches in Q3. User research showed a preference for simplicity. Next step: schedule a follow-up meeting.
-
-
-### 19. Curly Quotation Marks
-
-**Problem:** ChatGPT uses curly quotes (“...”) instead of straight quotes ("...").
-
-**Before:**
-> He said “the project is on track” but others disagreed.
-
-**After:**
-> He said "the project is on track" but others disagreed.
-
-
-## COMMUNICATION PATTERNS
-
-### 20. Collaborative Communication Artifacts
-
-**Words to watch:** I hope this helps, Of course!, Certainly!, You're absolutely right!, Would you like..., let me know, here is a...
-
-**Problem:** Text meant as chatbot correspondence gets pasted as content.
-
-**Before:**
-> Here is an overview of the French Revolution. I hope this helps! Let me know if you'd like me to expand on any section.
-
-**After:**
-> The French Revolution began in 1789 when financial crisis and food shortages led to widespread unrest.
-
-
-### 21. Knowledge-Cutoff Disclaimers and Speculative Gap-Filling
-
-**Words to watch:** as of [date], Up to my last training update, While specific details are limited/scarce..., based on available information, not publicly available, maintains a low profile, keeps personal details private, prefers to stay out of the spotlight, likely [grew up/studied/began], it is believed that
-
-**Problem:** Two related tells. (a) Older models leave hard knowledge-cutoff disclaimers in the text. (b) When a model can't find a source, it writes a paragraph *about* not finding one and then invents plausible filler to cover the gap. For a private person the guess almost always lands on the same stock phrases ("maintains a low profile," "keeps personal details private"), none of it sourced. Say what isn't known, or cut the sentence; don't dress a guess up as fact.
-
-**Before (cutoff disclaimer):**
-> While specific details about the company's founding are not extensively documented in readily available sources, it appears to have been established sometime in the 1990s.
-
-**After:**
-> The company was founded in 1994, according to its registration documents.
-
-**Before (speculative gap-fill):**
-> Information about her early life is not publicly available, suggesting she maintains a low profile and keeps personal details private. She likely grew up in a middle-class household, which shaped her later interest in education reform.
-
-**After:**
-> Her early life is not documented in the available sources. (Or omit the section.)
-
-
-### 22. Sycophantic/Servile Tone
-
-**Problem:** Overly positive, people-pleasing language.
-
-**Before:**
-> Great question! You're absolutely right that this is a complex topic. That's an excellent point about the economic factors.
-
-**After:**
-> The economic factors you mentioned are relevant here.
-
-
-## FILLER AND HEDGING
-
-### 23. Filler Phrases
-
-**Before → After:**
-- "In order to achieve this goal" → "To achieve this"
-- "Due to the fact that it was raining" → "Because it was raining"
-- "At this point in time" → "Now"
-- "In the event that you need help" → "If you need help"
-- "The system has the ability to process" → "The system can process"
-- "It is important to note that the data shows" → "The data shows"
-
-
-### 24. Excessive Hedging
-
-**Problem:** Over-qualifying statements.
-
-**Before:**
-> It could potentially possibly be argued that the policy might have some effect on outcomes.
-
-**After:**
-> The policy may affect outcomes.
-
-
-### 25. Generic Positive Conclusions
-
-**Problem:** Vague upbeat endings.
-
-**Before:**
-> The future looks bright for the company. Exciting times lie ahead as they continue their journey toward excellence. This represents a major step in the right direction.
-
-**After:**
-> The company plans to open two more locations next year.
-
-
-### 26. Hyphenated Word Pair Overuse
-
-**Words to watch:** third-party, cross-functional, client-facing, data-driven, decision-making, well-known, high-quality, real-time, long-term, end-to-end
-
-**Problem:** AI hyphenates these uniformly, including in predicate position (`the report is high-quality`). Humans hyphenate inconsistently — typically only when the compound is attributive (`a high-quality report`) and often dropping the hyphen otherwise (`the report is high quality`). Keep attributive-position hyphens; drop them when the compound follows the noun.
-
-**Before:**
-> The cross-functional team delivered a high-quality, data-driven report. The team is cross-functional, the report is high-quality, and the methodology is data-driven.
-
-**After:**
-> The cross-functional team delivered a high-quality, data-driven report. The team is cross functional, the report is high quality, and the methodology is data driven.
-
-
-### 27. Persuasive Authority Tropes
-
-**Phrases to watch:** The real question is, at its core, in reality, what really matters, fundamentally, the deeper issue, the heart of the matter
-
-**Problem:** LLMs use these phrases to pretend they are cutting through noise to some deeper truth, when the sentence that follows usually just restates an ordinary point with extra ceremony.
-
-**Before:**
-> The real question is whether teams can adapt. At its core, what really matters is organizational readiness.
-
-**After:**
-> The question is whether teams can adapt. That mostly depends on whether the organization is ready to change its habits.
-
-
-### 28. Signposting and Announcements
-
-**Phrases to watch:** Let's dive in, let's explore, let's break this down, here's what you need to know, now let's look at, without further ado
-
-**Problem:** LLMs announce what they are about to do instead of doing it. This meta-commentary slows the writing down and gives it a tutorial-script feel.
-
-**Before:**
-> Let's dive into how caching works in Next.js. Here's what you need to know.
-
-**After:**
-> Next.js caches data at multiple layers, including request memoization, the data cache, and the router cache.
-
-
-### 29. Fragmented Headers
-
-**Signs to watch:** A heading followed by a one-line paragraph that simply restates the heading before the real content begins.
-
-**Problem:** LLMs often add a generic sentence after a heading as a rhetorical warm-up. It usually adds nothing and makes the prose feel padded.
-
-**Before:**
-> ## Performance
->
-> Speed matters.
->
-> When users hit a slow page, they leave.
-
-**After:**
-> ## Performance
->
-> When users hit a slow page, they leave.
-
-
-### 30. Diff-Anchored Writing
-
-**Problem:** Documentation or comments written as if narrating a change rather than describing the thing as it is. Unless the document is inherently version-scoped (changelogs, release notes, migration guides), it should read coherently without knowing what changed in the last commit.
-
-**Before:**
-> This function was added to replace the previous approach of iterating through all items, which caused O(n²) performance.
-
-**After:**
-> This function uses a hash map for O(1) lookups, avoiding the O(n²) cost of naive iteration.
-
-
-## DETECTION GUIDANCE
-
-### What NOT to flag (false positives)
-
-A clean human writer can hit several of the patterns above without any AI involvement. Before rewriting, sanity-check that you are not gutting legitimate prose. The following are *not* reliable indicators on their own:
-
-- **Perfect grammar and consistent style.** Many writers are professionals or have been edited. Polish does not equal AI.
-- **Mixed casual and formal registers.** This often signals a person in a technical field, a young writer, or someone with neurodivergent prose habits — not a chatbot.
-- **"Bland" or "robotic" prose.** AI prose has *specific* tells. Generic dryness without those tells is just dry writing.
-- **Formal or academic vocabulary.** AI overuses *specific* fancy words (see §7), not all fancy words. Don't flatten "ostensibly" or "constituent" just because they sound brainy.
-- **Letter-style opening or closing on a comment.** Salutations and sign-offs predate ChatGPT by centuries.
-- **Common transition words in isolation.** *Additionally*, *moreover*, *consequently* are AI-coded only when piled up. One *however* is not a tell.
-- **Curly quotes alone.** macOS, Word, Google Docs, and most CMSes auto-curl by default. Curly quotes only count when stacked with other tells.
-- **Em dashes alone.** Many editors and journalists use them often. Em dashes are evidence only when paired with formulaic sales-y rhythm.
-- **Unsourced claims.** Most of the web is unsourced. Lack of citations doesn't prove anything.
-- **Correct, complex formatting.** Visual editors and templates produce clean output without any AI.
-
-When in doubt, look for **clusters** of tells, not isolated ones. A single em dash means nothing; em dashes plus rule-of-three plus *vibrant tapestry* plus a "Conclusion" section is a confession.
-
-
-### Signs of human writing (preserve these)
-
-When you see these, lean toward leaving the prose alone — they are evidence of a real person writing, and over-editing will destroy what makes the piece sound human:
-
-- **Specific, unusual, hard-to-fabricate detail.** A real address. A weird quote. The phrase "the lawyer who used to work upstairs from my dentist." LLMs round off specifics; humans hoard them.
-- **Mixed feelings and unresolved tension.** "I think this is mostly good, but it bothers me, and I can't fully explain why." LLMs default to clean takes.
-- **Dated, era-bound references.** Slang, memes, or in-jokes that map to a specific year and subculture. Models lag by a year or more.
-- **First-person editorial choices the writer can defend.** If the writer can explain *why* they made a particular cut or used a particular word, that's a strong human signal.
-- **Variety in sentence length.** Real writing alternates short and long. AI writing tends toward an even, mid-length cadence.
-- **Genuine asides, parentheticals, or self-corrections.** "(I keep wanting to say 'almost' here, but it really was certain.)" Models rarely interrupt themselves like this.
-- **Edits made before November 30, 2022.** ChatGPT's public launch. Anything older than that is, with very rare exceptions, not AI-written.
-
+本技能继承 [blader/humanizer](https://github.com/blader/humanizer) 的核心框架，参考中文适配项目 Humanizer-zh，并针对中文写作增加专门规则。英文原版中的很多模式在中文里并不直接成立，例如 em dash、title case、copula avoidance；因此这里不做机械翻译，而是重写为中文场景可用的编辑准则。
 
 ---
 
-## Process and Output
+## 你的任务
 
-1. Read the input carefully and identify every instance of the patterns above.
-2. Write a **draft rewrite**. Check that it reads naturally aloud, varies sentence length, prefers specific details and simple constructions (is/are/has), and keeps the appropriate register.
-3. Ask: **"What makes the below so obviously AI generated?"** Answer briefly with any remaining tells.
-4. Revise into a **final rewrite** that addresses them and contains no em or en dashes (see §14).
+当用户给出文本并要求“去 AI 化”“人性化”“改得自然一点”“像人写的”时：
 
-Deliver the draft, the brief "still-AI" bullets, the final rewrite, and (optionally) a short summary of changes.
+1. **识别 AI 痕迹**：扫描下面列出的 30 类模式。
+2. **重写，不要硬删**：保留原文要表达的信息，删掉空话、套话、假深度和无依据的判断。
+3. **保留结构和用途**：原文是报告就保持报告语气；是博客就可以更有个人声音；是技术文档就不要强行加情绪。
+4. **补具体性**：优先用原文、用户材料或可验证来源中的事实、对象、动作、限制条件和例子替代抽象价值词；没有事实时，提示补来源或删掉空话，不要自行编数字、人物、机构或案例。
+5. **匹配作者声音**：如果用户提供写作样本，要模仿样本的句长、词汇、节奏和标点习惯。
+6. **最终自检**：交付前问自己：“这段话还有哪里一眼像 AI 写的？”然后再改一轮。
 
+---
 
-## Full Example
+## 语气校准（可选但优先）
 
-**Before (AI-sounding):**
-> Great question! Here is an essay on this topic. I hope this helps!
->
-> AI-assisted coding serves as an enduring testament to the transformative potential of large language models, marking a pivotal moment in the evolution of software development. In today's rapidly evolving technological landscape, these groundbreaking tools—nestled at the intersection of research and practice—are reshaping how engineers ideate, iterate, and deliver, underscoring their vital role in modern workflows.
->
-> At its core, the value proposition is clear: streamlining processes, enhancing collaboration, and fostering alignment. It's not just about autocomplete; it's about unlocking creativity at scale, ensuring that organizations can remain agile while delivering seamless, intuitive, and powerful experiences to users. The tool serves as a catalyst. The assistant functions as a partner. The system stands as a foundation for innovation.
->
-> Industry observers have noted that adoption has accelerated from hobbyist experiments to enterprise-wide rollouts, from solo developers to cross-functional teams. The technology has been featured in The New York Times, Wired, and The Verge. Additionally, the ability to generate documentation, tests, and refactors showcases how AI can contribute to better outcomes, highlighting the intricate interplay between automation and human judgment.
->
-> - 💡 **Speed:** Code generation is significantly faster, reducing friction and empowering developers.
-> - 🚀 **Quality:** Output quality has been enhanced through improved training, contributing to higher standards.
-> - ✅ **Adoption:** Usage continues to grow, reflecting broader industry trends.
->
-> While specific details are limited based on available information, it could potentially be argued that these tools might have some positive effect. Despite challenges typical of emerging technologies—including hallucinations, bias, and accountability—the ecosystem continues to thrive. In order to fully realize this potential, teams must align with best practices.
->
-> In conclusion, the future looks bright. Exciting times lie ahead as we continue this journey toward excellence. Let me know if you’d like me to expand on any section!
+如果用户提供了自己的写作样本，先分析样本再改写：
 
-**Draft rewrite:**
-> AI coding assistants speed up some tasks. In a 2024 study by Google, developers using Codex completed simple functions 55% faster than a control group, but showed no improvement on debugging or architectural decisions.
->
-> The tools are good at boilerplate: config files, test scaffolding, repetitive refactors. They are bad at knowing when they are wrong. I have mass-accepted suggestions that compiled, passed lint, and still did the wrong thing because I stopped paying attention.
->
-> Mira, an engineer at a fintech startup I interviewed, said she uses Copilot "like autocomplete for boring code" but reviews every line before committing. Jake, a senior dev at a larger company, disabled it after it kept suggesting patterns from a deprecated internal library.
->
-> The productivity claims are hard to verify. GitHub says Copilot users "accept 30% of suggestions," but acceptance is not correctness, and correctness is not value. The 2024 Uplevel study found no statistically significant difference in pull-request throughput between teams with and without AI assistants.
->
-> None of this means the tools are useless. It means they are tools. They do not replace judgment, and they do not eliminate the need for tests. If you do not have tests, you cannot tell whether the suggestion is right.
+- 句子是短促、松散，还是长句较多？
+- 用词偏口语、商务、学术，还是技术文档？
+- 段落开头是直接进入主题，还是先铺垫？
+- 常用标点是什么？顿号多不多？括号、冒号、破折号是否常见？
+- 是否常用第一人称、反问、插话、吐槽？
+- 转折是靠“但是/不过/所以”，还是直接换句？
 
-**What makes the below so obviously AI generated?**
-- The rhythm is still a bit too tidy (clean contrasts, evenly paced paragraphs).
-- The named people and study citations can read like plausible-but-made-up placeholders unless they're real and sourced.
-- The closer leans a touch slogan-y ("If you do not have tests...") rather than sounding like a person talking.
+**匹配样本，而不是套用统一风格。** 如果样本写得很短，不要改成长篇散文；如果样本很正式，不要强行口语化。
 
-**Now make it not obviously AI generated.**
-> AI coding assistants can make you faster at the boring parts. Not everything. Definitely not architecture.
+没有样本时，默认风格是：自然、克制、具体，有节奏变化，不油滑，不端着。
+
+---
+
+## 核心原则速查
+
+1. **少说价值，多说事实**：不要说“意义重大”，说它改变了什么、影响了谁、怎么发生。
+2. **少用套话，多用动作**：不要说“持续赋能行业发展”；如果原文或资料提供了真实数据，可以写成“把审批时间从 3 天缩到 4 小时”。
+3. **少铺垫，直接开始**：删掉“在当今时代背景下”“随着技术不断发展”等暖场句。
+4. **少排比，保留重点**：三连、四连、层层递进很容易像 AI。
+5. **少圆滑，允许不完美**：真人写作会有侧重、取舍、停顿和一点不那么工整的地方。
+6. **不编细节**：可以把空话改具体，但不能凭空添加事实、数据、人物、机构或引用。
+
+---
+
+## 什么时候应该“有灵魂”
+
+避免 AI 味不是把所有文字都改成段子。不同文本需要不同声音：
+
+- **博客、评论、随笔、社媒**：可以有第一人称、判断、犹豫、吐槽和不那么工整的节奏。
+- **产品文案**：可以更直接、更少形容词，突出实际场景和用户动作。
+- **技术文档**：应该清楚、具体、可执行，不要注入情绪。
+- **论文、报告、公文**：保持正式，但要减少空泛、堆叠和无依据结论。
+- **百科、资料页**：中立和朴素就是好风格，不要强行“有个性”。
+
+### 缺乏人味的迹象
+
+- 每段都像“背景 → 价值 → 展望”。
+- 每句都很顺，但没有一句有信息密度。
+- 总在“体现、彰显、赋能、助力、推动”。
+- 观点永远正确、温和、全面，却没有取舍。
+- 结尾总是“未来可期”“持续发展”“贡献力量”。
+
+### 更像真人的写法
+
+- 有明确判断：“这个方案能解决审批慢的问题，但解决不了数据质量。”
+- 有具体限制：“适合 20 人以内团队，再大就要加权限分层。”
+- 有自然节奏：“能用。但别指望它替你做判断。”
+- 有必要的主语：“运营团队每周五导出报表”，不要写“报表将被定期导出”。
+
+---
+
+# 30 类中文 AI 写作痕迹
+
+> 下面的“改写后”示例用于展示编辑方向。凡是涉及数字、用户反馈、业务场景、团队动作或产品功能的细节，都假设这些信息来自原文、用户补充或可验证资料。实际改写时不要凭空补事实；没有来源时，应改成更克制的表述，或提示用户补充材料。
+
+## 一、内容模式
+
+### 1. 过度强调意义、价值和时代背景
+
+**警惕表达：** 标志着、彰显了、体现了、凸显了、具有重要意义、具有里程碑意义、开启新篇章、迈上新台阶、注入新动能、为……奠定坚实基础、在……背景下、顺应时代潮流、推动……高质量发展。
+
+**问题：** AI 喜欢把普通事实抬高到宏大叙事里，让一句简单信息背上“时代意义”。
+
+**改写前：**
+> 本次系统升级标志着公司数字化转型迈入新阶段，为后续业务创新奠定了坚实基础，也彰显了团队持续追求卓越的坚定决心。
+
+**改写后：**
+> 这次升级主要改了三处：审批流程合并到一个页面，报表支持自动导出，权限配置从代码里移到了后台。
+
+---
+
+### 2. 过度强调知名度、背书和影响力
+
+**警惕表达：** 获得广泛关注、备受行业认可、被多家媒体报道、深受用户喜爱、业内领先、标杆案例、权威专家指出、行业普遍认为。
+
+**问题：** 没有具体来源、数据或场景时，这些背书只是在制造可信感。
+
+**改写前：**
+> 该产品一经推出便受到行业广泛关注，并凭借出色的创新能力获得众多用户的一致好评。
+
+**改写后：**
+> 产品上线后，第一批用户主要来自 12 家连锁门店。反馈最多的是库存同步慢，其次是移动端录入不方便。
+
+---
+
+### 3. 表面化分析和伪因果
+
+**警惕表达：** 体现了、反映了、彰显了、展现了、折射出、说明了、进一步证明了、充分体现、深刻揭示。
+
+**问题：** AI 经常把一个现象直接拔高成“说明了某种趋势”，但中间没有证据链。
+
+**改写前：**
+> 用户对该功能的积极反馈，充分体现了企业在用户体验方面的深耕，也反映出市场对智能化服务的强烈需求。
+
+**改写后：**
+> 用户主要喜欢两个地方：不用重复填表，以及可以在手机上查看审批状态。至于是否代表市场需求，还需要看后续留存数据。
+
+---
+
+### 4. 宣传腔和广告腔
+
+**警惕表达：** 匠心打造、极致体验、重磅推出、震撼来袭、全新升级、焕新登场、沉浸式体验、无缝衔接、强势赋能、全方位护航、卓越品质。
+
+**问题：** 这些词看起来热闹，但通常没有告诉读者具体变化。
+
+**改写前：**
+> 我们重磅推出全新升级的一站式服务平台，以极致体验全方位护航企业成长。
+
+**改写后：**
+> 新平台把合同、发票和售后工单放在同一个后台。客户不用再分别登录三个系统。
+
+---
+
+### 5. 模糊归因和无来源判断
+
+**警惕表达：** 有观点认为、业内人士表示、专家指出、研究表明、相关数据显示、据悉、据了解、市场普遍认为、用户普遍反馈。
+
+**问题：** 没有说明谁说的、数据来自哪里、样本是什么，就不要把判断包装成事实。
+
+**改写前：**
+> 相关数据显示，越来越多企业正在加速拥抱 AI，专家认为这将深刻改变未来办公方式。
+
+**改写后：**
+> 如果没有数据来源，可以改成：一些企业开始把 AI 用在客服、文档整理和代码补全上。它会改变多少工作流程，还要看实际部署效果。
+
+---
+
+### 6. 公式化“挑战与展望”
+
+**警惕结构：** “尽管面临挑战，但……” “未来，随着……不断发展……” “仍需在……方面持续发力……” “机遇与挑战并存”。
+
+**问题：** 这类结尾常常像报告模板，覆盖任何主题都成立，因此几乎没有信息量。
+
+**改写前：**
+> 尽管当前仍面临数据安全、技术成熟度和人才储备等挑战，但随着政策环境持续优化和技术不断进步，行业未来发展前景广阔。
+
+**改写后：**
+> 现在最大的限制是数据权限。销售、财务和客服的数据还不能打通，所以系统只能处理售后工单，暂时不能做客户流失预测。
+
+---
+
+## 二、中文语言和句式模式
+
+### 7. 高频 AI 词汇堆叠
+
+**警惕词：** 赋能、助力、深耕、打造、沉淀、闭环、抓手、路径、生态、格局、场景、落地、升级、优化、迭代、链接、协同、引领、驱动、撬动、释放、聚焦、洞察、探索、构建、塑造、重塑。
+
+**问题：** 这些词不是禁词。问题在于成串出现，替代了具体动作。
+
+**改写前：**
+> 平台将持续深耕垂直场景，通过数据驱动和能力沉淀，赋能企业构建高效协同的数字化生态闭环。
+
+**改写后：**
+> 平台接下来会先支持门店盘点和补货提醒。店长可以看到缺货商品，采购员可以直接生成补货单。
+
+---
+
+### 8. 四字词和成语堆砌
+
+**警惕表达：** 蓬勃发展、砥砺前行、锐意进取、凝心聚力、提质增效、行稳致远、久久为功、守正创新、踔厉奋发、笃行不怠、乘势而上、奋楫扬帆。
+
+**问题：** 四字词连续出现会让文字像公文、宣传稿或 AI 套话。除非语境本来就是正式公文，否则要减少。
+
+**改写前：**
+> 团队将凝心聚力、锐意进取，在提质增效中砥砺前行，推动业务蓬勃发展、行稳致远。
+
+**改写后：**
+> 团队下季度会先处理两个问题：客服响应慢，以及老客户续费率下降。
+
+---
+
+### 9. “不仅……更……”式伪递进
+
+**警惕结构：** 不仅是……更是……；不只是……而是……；不仅能够……还能够……更能够……。
+
+**问题：** AI 喜欢用这种结构制造层次感，但很多时候两个分句只是同义重复。
+
+**改写前：**
+> 这不仅是一款效率工具，更是企业数字化转型的重要引擎。
+
+**改写后：**
+> 这款工具能自动汇总日报，减少主管手动整理表格的时间。
+
+---
+
+### 10. 三连和多连排比
+
+**警惕结构：** 高效、智能、便捷；安全、稳定、可靠；降本、增效、提质；全流程、全场景、全链路。
+
+**问题：** 三连排比很顺，但经常把不同层级的概念硬塞在一起。
+
+**改写前：**
+> 我们提供高效、智能、便捷的一体化解决方案，帮助企业实现降本、增效、提质。
+
+**改写后：**
+> 这套方案主要减少人工录入。以前每张订单要填 6 个字段，现在系统会自动带出客户和商品信息。
+
+---
+
+### 11. 同义词循环
+
+**警惕现象：** 为避免重复，把同一个东西不断换叫法：该平台、该系统、这一工具、该解决方案、这一能力、该产品。
+
+**问题：** 中文里适度重复比刻意换词更自然。过度换词反而像 AI。
+
+**改写前：**
+> 该平台可以整合数据。该系统还能生成报表。这一工具将帮助企业提升效率，该解决方案也具备良好的扩展性。
+
+**改写后：**
+> 这个平台可以整合数据并生成报表。后续如果要接新门店，也可以在后台新增账号和权限。
+
+---
+
+### 12. 虚假范围和夸张跨度
+
+**警惕结构：** 从 X 到 Y、覆盖从……到……、贯穿……全周期、横跨……多个维度、打通全链路。
+
+**问题：** 如果 X 和 Y 不是同一尺度上的两端，这种写法就是制造“全面感”。
+
+**改写前：**
+> 该方案覆盖从战略规划到执行落地的全流程，贯穿企业数字化转型的各个关键环节。
+
+**改写后：**
+> 该方案包括三部分：需求梳理、系统配置和上线培训。不包含组织架构调整和数据治理。
+
+---
+
+### 13. 主语缺失和被动腔
+
+**警惕表达：** 将被、已完成、得到提升、实现优化、进行了处理、被广泛应用、相关工作正在推进。
+
+**问题：** 主语缺失会让责任、动作和事实变模糊。能写清谁做了什么，就写清楚。
+
+**改写前：**
+> 相关问题已得到有效处理，后续优化工作也将持续推进。
+
+**改写后：**
+> 运维团队已经修复登录超时问题。下周会继续处理导出失败和消息延迟。
+
+---
+
+### 14. “通过……实现……”模板句
+
+**警惕结构：** 通过 A，实现 B；依托 A，打造 B；围绕 A，构建 B；基于 A，推动 B。
+
+**问题：** 这类句式在中文 AI 文本里非常常见，容易把动作写得抽象。
+
+**改写前：**
+> 通过整合多源数据，实现业务流程的智能化升级。
+
+**改写后：**
+> 系统会把 CRM、订单和售后工单的数据合在一张客户卡片里，销售不用再来回切系统。
+
+---
+
+### 15. “一体化 / 一站式 / 全方位”泛化
+
+**警惕表达：** 一体化平台、一站式服务、全方位支持、全流程管理、全链路覆盖、全场景赋能。
+
+**问题：** “全”字越多，越要问具体包含什么、不包含什么。
+
+**改写前：**
+> 我们为客户提供一站式、全方位、全流程的数字化服务。
+
+**改写后：**
+> 我们提供系统部署、数据迁移和上线培训。硬件采购和现场网络改造需要客户另找供应商。
+
+---
+
+## 三、风格和格式模式
+
+### 16. 破折号、括号和冒号制造戏剧感
+
+**警惕现象：** 大量使用“——”、括号补充、冒号揭示答案，形成“先吊胃口再揭晓”的节奏。
+
+**问题：** 中文里破折号可以用，但 AI 常用它制造“金句感”。不要把每个解释都写成揭晓。
+
+**改写前：**
+> 真正的问题是——企业并不缺工具，而是缺少能真正落地的路径。
+
+**改写后：**
+> 问题不在工具数量，而在使用流程。很多团队买了系统，却没有改审批和汇报习惯。
+
+---
+
+### 17. 粗体、编号和内联标题过多
+
+**警惕格式：** 每条都用 `**关键词：**` 开头，或在短文里频繁加粗“核心优势”“关键价值”“应用场景”。
+
+**问题：** AI 喜欢把普通段落切成整齐清单。必要时保留清单，但不要让格式替代内容。
+
+**改写前：**
+> - **效率提升：** 系统可以显著提升工作效率。
+> - **成本降低：** 平台可以有效降低运营成本。
+> - **体验优化：** 产品可以全面优化用户体验。
+
+**改写后：**
+> 系统上线后，客服不用手动复制订单号。每单大约少花 40 秒，主要节省在查询和粘贴上。
+
+---
+
+### 18. Emoji 装饰和过度符号化
+
+**警惕现象：** 🚀、✨、✅、💡、🔥 等用于标题、列表、总结。
+
+**问题：** 除非用户明确要社媒风，否则这些符号会让文本像 AI 生成的运营稿。
+
+**改写前：**
+> 🚀 核心亮点：全新 AI 能力上线，助力企业高效增长！
+
+**改写后：**
+> 新版本增加了自动分类功能。客服收到工单后，系统会先按问题类型分到售后、物流或财务。
+
+---
+
+### 19. 标题空泛和层级过满
+
+**警惕标题：** 背景介绍、核心价值、应用场景、未来展望、总结、关键洞察、深度解析。
+
+**问题：** 标题如果可以套在任何文章上，就不够具体。
+
+**改写前：**
+> ## 核心价值
 >
-> They're great at boilerplate: config files, test scaffolding, repetitive refactors. They're also great at sounding right while being wrong. I've accepted suggestions that compiled, passed lint, and still missed the point because I stopped paying attention.
+> 该系统能够为企业带来显著价值。
+
+**改写后：**
+> ## 少填订单号
 >
-> People I talk to tend to land in two camps. Some use it like autocomplete for chores and review every line. Others disable it after it keeps suggesting patterns they don't want. Both feel reasonable.
+> 系统会自动读取订单信息，客服只需要确认问题类型。
+
+---
+
+### 20. 金句化和口号化
+
+**警惕表达：** 真正的……不是……而是……；未来已来；每一次……都是……；让……回归……；用技术点亮未来。
+
+**问题：** AI 容易写出像演讲稿的句子。听起来有气势，但不一定有内容。
+
+**改写前：**
+> 真正的效率提升，不是工具的堆叠，而是人与技术之间的深度协同。
+
+**改写后：**
+> 效率提升主要来自两个改动：少填重复字段，以及减少跨系统查询。
+
+---
+
+### 21. 过度工整的段落节奏
+
+**警惕现象：** 每段 3 句，每句长度相近，每段都以总结句收尾。
+
+**问题：** 真人写作通常会有长短、停顿、重点和不完全对称的结构。
+
+**改写前：**
+> 这个功能解决了用户痛点。它提升了工作效率。未来它还将覆盖更多场景。
+
+**改写后：**
+> 这个功能先解决一个很小的问题：用户不用再重复上传同一份附件。至于能不能扩展到更多流程，要看权限和存储成本。
+
+---
+
+## 四、交流痕迹和 AI 对话残留
+
+### 22. Chatbot 式开场和结尾
+
+**警惕表达：** 当然可以、没问题、下面是、希望这对你有帮助、如果你需要我可以继续、请告诉我、以下是一个优化版本。
+
+**问题：** 这些是对话助手的痕迹，不应该出现在正式文本里。
+
+**改写前：**
+> 当然可以，下面是一段关于远程办公的分析，希望对你有帮助。
+
+**改写后：**
+> 远程办公降低了通勤成本，但也让沟通问题更容易被拖延。
+
+---
+
+### 23. 知识截止和信息不足免责声明
+
+**警惕表达：** 截至我所知、根据现有信息、公开资料有限、无法确定、可能是、似乎表明、据推测。
+
+**问题：** 如果不知道，就说不知道；如果要保留，就明确范围。不要用一整段话包装不确定。
+
+**改写前：**
+> 由于公开资料相对有限，目前尚无法全面确认该公司的具体发展历程，但可以推测其在行业中具有一定影响力。
+
+**改写后：**
+> 公开资料里没有这家公司的完整发展历程。现有信息只能确认它在 2021 年完成过一次融资。
+
+---
+
+### 24. 谄媚和过度礼貌
+
+**警惕表达：** 非常好的问题、你说得完全正确、这是一个很有深度的问题、很高兴为你解答、你的理解非常到位。
+
+**问题：** 除非文本本身是客服对话，否则这类语气会显得像 AI 助手。
+
+**改写前：**
+> 这是一个非常好的问题。你说得完全正确，AI 对教育的影响确实值得深入探讨。
+
+**改写后：**
+> AI 对教育的影响主要集中在作业批改、个性化练习和学术诚信三个方面。
+
+---
+
+### 25. 说明书式引导
+
+**警惕表达：** 接下来我们将、让我们深入探讨、本文将从三个方面展开、下面我们来看看、总的来说。
+
+**问题：** 不要宣布要写什么，直接写。
+
+**改写前：**
+> 接下来我们将从技术、业务和组织三个维度，深入探讨 AI 如何赋能企业增长。
+
+**改写后：**
+> 企业引入 AI 后，最先变化的通常是客服和文档处理。它们流程固定，错误成本相对可控。
+
+---
+
+## 五、填充、模糊和空泛结论
+
+### 26. 填充短语
+
+**改写前 → 改写后：**
+
+- “在当前快速发展的时代背景下” → 删除，或改成具体背景。
+- “为了能够更好地实现这一目标” → “为了实现这个目标”。
+- “从某种程度上来说” → 删除，除非真的需要限定。
+- “值得注意的是” → 通常删除，直接说重点。
+- “不可否认的是” → 删除，除非后文有争议。
+- “我们可以看到” → 删除，直接说看到的内容。
+- “在一定程度上” → 改成具体程度，或删除。
+
+**问题：** 填充短语让句子变长，但信息没有增加。
+
+---
+
+### 27. 过度限定和模糊判断
+
+**警惕表达：** 可能会、一定程度上、潜在地、或许可以、相对而言、比较显著、具有一定的、较为明显、可能在未来产生影响。
+
+**问题：** 谨慎是好事，但多个限定叠在一起会显得虚。
+
+**改写前：**
+> 该政策可能会在一定程度上对企业的长期发展产生较为积极的潜在影响。
+
+**改写后：**
+> 该政策会降低小微企业前三年的社保支出。是否能改善长期经营，还要看订单和现金流。
+
+---
+
+### 28. 通用积极结论
+
+**警惕表达：** 未来可期、前景广阔、值得期待、持续向好、不断迈向新高度、共同创造美好未来。
+
+**问题：** 这些结尾太容易套用，通常应该改成下一步、限制、未解决问题或具体计划。
+
+**改写前：**
+> 展望未来，随着技术不断成熟和生态持续完善，行业发展前景广阔，值得期待。
+
+**改写后：**
+> 下一步要看两个指标：模型调用成本能否降下来，以及企业是否愿意把内部数据接入系统。
+
+---
+
+### 29. 差异叙事和改动旁白
+
+**警惕表达：** 本次新增、相比之前、进一步优化、在原有基础上、此次改版、该功能的加入使得。
+
+**问题：** 除了更新日志、发布说明和迁移指南，文档不应该总在讲“这次改了什么”，而应该描述当前事实。
+
+**改写前：**
+> 本次新增的权限管理功能进一步优化了原有流程，使管理员能够更加灵活地完成用户配置。
+
+**改写后：**
+> 管理员可以按部门、角色和项目分配权限。新员工加入项目后，会自动继承项目默认权限。
+
+---
+
+### 30. 伪全面和“正确废话”
+
+**警惕表达：** 需要综合考虑多方面因素、应结合实际情况、既要……也要……、需要平衡效率与安全、应持续优化完善。
+
+**问题：** 这些话通常没错，但太正确了，以至于没有信息量。要写清“哪些因素”“怎么平衡”“谁来做”。
+
+**改写前：**
+> 企业在推进 AI 应用时，需要综合考虑技术、业务、安全和人才等多方面因素，并结合自身实际情况持续优化完善。
+
+**改写后：**
+> 企业上线 AI 客服前，至少要先确定三件事：哪些问题可以自动回答，哪些必须转人工，回答错了由谁复核。
+
+---
+
+# 检测指导
+
+## 不要误伤这些情况
+
+以下现象单独出现时，不要直接判定为 AI：
+
+- **文字很正式**：正式不等于 AI。很多报告、公文、论文就是正式风格。
+- **语法很干净**：好编辑和好作者也会写得干净。
+- **使用常见连接词**：一个“此外”或“因此”不是问题，堆叠才是问题。
+- **使用成语或四字词**：中文写作本来会用四字词，连续堆砌才像模板。
+- **没有强烈个性**：技术文档、法律文本、百科条目本来就不该有太多个人声音。
+- **用了破折号或括号**：这只是标点选择，不是铁证。
+- **有清单和标题**：结构化写作不等于 AI，问题在于清单是否空泛。
+
+判断时看**痕迹簇**：空泛价值词 + 三连排比 + 模板句 + 泛泛展望 + 无来源背书，才是真正的问题。
+
+## 应该保留的人类写作信号
+
+看到这些特征时，不要过度修平：
+
+- 具体但不完美的细节：时间、地点、限制、真实小问题。
+- 明确取舍：作者说“不适合某类场景”。
+- 轻微的不对称：段落长短不一，句子节奏不完全工整。
+- 有责任主体：谁做了什么，而不是“相关工作已推进”。
+- 有合理犹豫：作者承认不知道，或说明证据不足。
+- 有真实口吻：一点停顿、插话、补充说明，但不油腻。
+
+---
+
+# 处理流程
+
+1. **阅读原文**：判断文本类型、受众、用途和应有语气。
+2. **标出问题**：找出 30 类模式中的具体实例。
+3. **写第一版改写**：保留原意，去掉套话，换成具体动作、对象和限制。
+4. **自问一遍**：这版哪里还像 AI？是否还有空泛结论、三连排比、赋能体、总结腔？
+5. **写最终版**：修掉剩余 AI 痕迹。
+6. **不要编造**：如果原文没有事实，不要凭空添加数据。可以用“如果没有来源，应删除或补来源”提醒用户。
+
+---
+
+# 输出格式
+
+默认输出：
+
+1. **改写后文本**
+2. **主要修改说明**（可简短列 3-6 条）
+
+如果用户要求详细审阅，输出：
+
+1. **识别到的 AI 痕迹**
+2. **改写后文本**
+3. **为什么这样改**
+4. **可选的更口语 / 更正式版本**
+
+如果用户只想要最终文本，不要长篇解释。
+
+---
+
+# 质量评分（可选）
+
+可按 50 分制快速评估：
+
+| 维度 | 标准 | 分值 |
+|---|---|---|
+| 直接性 | 是否直接说事，少铺垫 | /10 |
+| 具体性 | 是否有对象、动作、限制、例子 | /10 |
+| 节奏 | 句长和段落是否自然变化 | /10 |
+| 真实感 | 是否像真人在表达，而不是模板生成 | /10 |
+| 克制度 | 是否少用大词、套话、泛泛总结 | /10 |
+| 总分 | 45+ 很好；35-44 可用；35 以下需重写 | /50 |
+
+---
+
+# 完整示例
+
+**改写前（AI 味明显）：**
+
+> 当然可以，下面是一段关于企业 AI 转型的分析，希望对你有帮助。
 >
-> The productivity metrics are slippery. GitHub can say Copilot users "accept 30% of suggestions," but acceptance isn't correctness, and correctness isn't value. If you don't have tests, you're basically guessing.
+> 在当前数字化浪潮不断加速的时代背景下，人工智能不仅是一项技术工具，更是推动企业高质量发展的关键引擎。它通过深度赋能业务场景，助力企业实现降本、增效、提质，进一步构建智能化、协同化、一体化的数字生态闭环。
+>
+> 具体来看，AI 可以广泛应用于客服、营销、运营等多个场景，全面提升企业的响应速度、服务质量和管理效率。行业专家认为，随着技术不断成熟，AI 将在未来释放更大价值，成为企业打造核心竞争力的重要抓手。
+>
+> 尽管目前仍面临数据安全、人才储备和技术落地等挑战，但随着政策环境持续优化和产业生态不断完善，AI 赋能企业发展的前景广阔，未来可期。
 
-**Changes made:** Stripped the chatbot framing, significance inflation, promotional and -ing padding, rule-of-three and synonym cycling, false ranges, copula avoidance, em dashes/emojis/boldface/curly quotes, the formulaic "challenges" section, cutoff and hedging disclaimers, filler and persuasive framing, and the generic upbeat conclusion - then rebuilt the voice with varied rhythm and concrete detail.
+**第一版改写：**
 
+> 企业用 AI，最容易先落在客服、文档整理和数据查询上。这些工作流程固定，判断边界相对清楚，出错后也比较容易复核。
+>
+> 真正难的是接入内部数据。客服机器人如果拿不到订单、物流和售后记录，只能回答通用问题；一旦接入这些数据，又会牵涉权限、脱敏和审计。
+>
+> 所以企业不该一开始就谈“全面转型”。更现实的做法是先选一个低风险流程，比如售后工单分类。跑通后再看能不能扩到退款审核或客户流失提醒。
 
-## Reference
+**还有哪里像 AI：**
 
-This skill is based on [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by WikiProject AI Cleanup. The patterns documented there come from observations of thousands of instances of AI-generated text on Wikipedia.
+- “真正难的是”略带金句感，但可接受。
+- 结构仍然偏整齐，每段都在解释一个点。
+- 如果面向正式报告，第一句“企业用 AI”略口语。
 
-Key insight from Wikipedia: "LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases."
+**最终版：**
+
+> 企业上 AI，通常先从客服、文档整理和数据查询做起。这些流程比较固定，错了也容易复核。
+>
+> 难点在内部数据。客服机器人如果看不到订单、物流和售后记录，只能回答通用问题；接入这些数据后，又要处理权限、脱敏和审计。
+>
+> 比较稳的做法是先选一个低风险流程，比如售后工单分类。这个流程跑通了，再考虑退款审核、客户流失提醒这类更敏感的场景。
+
+**修改说明：**
+
+- 删除 chatbot 开场和结尾。
+- 删除“数字化浪潮”“关键引擎”“高质量发展”等宏大套话。
+- 删除“赋能、助力、闭环、抓手、未来可期”等高频 AI 词。
+- 把三连排比改成具体场景和限制条件。
+- 用“内部数据、权限、脱敏、审计”等具体问题替代泛泛挑战。
+
+---
+
+# 参考
+
+- [blader/humanizer](https://github.com/blader/humanizer) — 英文原版框架
+- [op7418/Humanizer-zh](https://github.com/op7418/Humanizer-zh) — 中文翻译适配参考
+- [Wikipedia: Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) — 原始观察来源
+
+关键原则：AI 文本的问题不是“太正确”，而是经常只有正确的壳，没有具体的人、动作、限制和取舍。

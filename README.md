@@ -1,19 +1,46 @@
-# Humanizer
+# Humanizer：中文 AI 写作去痕 Skill
 
-A skill for Claude Code and OpenCode that removes signs of AI-generated writing from text, making it sound more natural and human.
+一个适用于 **Claude Code** 和 **OpenCode** 的中文写作编辑技能，用来识别并去除中文文本中的 AI 生成痕迹，让文字更自然、更具体、更像真人写作。
 
-## Installation
+当前版本：**3.0.0**
+
+> 这个项目不是为了“欺骗 AI 检测器”，而是为了提升文本质量：少一点套话、空话、赋能体和模板感，多一点具体事实、真实取舍和自然节奏。具体事实必须来自原文、用户材料或可验证来源；没有来源时，不要自行编数据、人物、机构或案例。
+
+## 项目来源
+
+本仓库基于 [blader/humanizer](https://github.com/blader/humanizer) fork 改造：
+
+- 保留原项目的 Claude Code / OpenCode skill 结构。
+- 参考 [op7418/Humanizer-zh](https://github.com/op7418/Humanizer-zh) 的中文化方向。
+- 针对中文语境重写规则和示例，而不是机械翻译英文模式。
+- 新增中文 AI 写作常见问题：四字词堆砌、赋能体、公文腔、总结腔、模板句式、伪深度排比、空泛价值宣告等。
+
+## 适用场景
+
+- 改写 AI 生成的中文文章、博客、报告和产品文案
+- 审阅公众号、社媒、演讲稿、商业文档中的 AI 味
+- 把“正确但空”的文本改得更具体
+- 学习识别中文 AI 写作常见模式
+- 为自己的 Claude Code / OpenCode 增加中文写作编辑能力
+
+不适合：
+
+- 凭空补事实、补数据、补引用
+- 把正式文档强行改成口语风
+- 用来规避学术诚信、版权或平台规则
+
+## 安装
 
 ### Claude Code
 
-Clone directly into Claude Code's skills directory:
+推荐直接克隆到 Claude Code skills 目录：
 
 ```bash
 mkdir -p ~/.claude/skills
-git clone https://github.com/blader/humanizer.git ~/.claude/skills/humanizer
+git clone https://github.com/loongwind/humanizer.git ~/.claude/skills/humanizer
 ```
 
-Or copy the skill file manually if you already have this repo cloned:
+如果你已经克隆了仓库，也可以只复制技能文件：
 
 ```bash
 mkdir -p ~/.claude/skills/humanizer
@@ -22,176 +49,208 @@ cp SKILL.md ~/.claude/skills/humanizer/
 
 ### OpenCode
 
-Clone directly into OpenCode's skills directory:
+克隆到 OpenCode skills 目录：
 
 ```bash
 mkdir -p ~/.config/opencode/skills
-git clone https://github.com/blader/humanizer.git ~/.config/opencode/skills/humanizer
+git clone https://github.com/loongwind/humanizer.git ~/.config/opencode/skills/humanizer
 ```
 
-Or copy the skill file manually if you already have this repo cloned:
+或手动复制：
 
 ```bash
 mkdir -p ~/.config/opencode/skills/humanizer
 cp SKILL.md ~/.config/opencode/skills/humanizer/
 ```
 
-> **Note:** OpenCode also scans `~/.claude/skills/` for compatibility, so if you use both tools, a single clone into `~/.claude/skills/humanizer/` is enough.
+> OpenCode 也会扫描 `~/.claude/skills/`，如果你同时使用 Claude Code 和 OpenCode，通常只需要安装到 `~/.claude/skills/humanizer/`。
 
-## Usage
+## 使用方法
 
-### Claude Code
+### 直接调用 Skill
 
-```
+```text
 /humanizer
 
-[paste your text here]
+请把下面这段中文去 AI 化：
+
+[粘贴文本]
 ```
 
-### OpenCode
+### 在自然语言中调用
 
+```text
+帮我把这段话改得不像 AI 写的，保留正式报告语气：
+
+[粘贴文本]
 ```
+
+### 匹配个人写作风格
+
+```text
 /humanizer
 
-[paste your text here]
+这是我的写作样本：
+[粘贴 2-3 段你自己的文字]
+
+请用类似风格改写下面这段：
+[粘贴 AI 文本]
 ```
 
-Or ask the model to humanize text directly in either tool:
+Skill 会先分析你的句长、词汇、节奏、标点和转折方式，再进行改写。
 
-```
-Please humanize this text: [your text]
-```
+## 检测的 30 类中文 AI 写作痕迹
 
-### Voice Calibration
+### 一、内容模式
 
-To match your personal writing style, provide a sample of your own writing:
+| # | 模式 | 常见表现 |
+|---|---|---|
+| 1 | 过度强调意义、价值和时代背景 | “标志着”“具有里程碑意义”“开启新篇章” |
+| 2 | 过度强调知名度、背书和影响力 | “广泛关注”“行业认可”“专家指出” |
+| 3 | 表面化分析和伪因果 | “体现了”“反映了”“充分说明” |
+| 4 | 宣传腔和广告腔 | “重磅推出”“极致体验”“全方位护航” |
+| 5 | 模糊归因和无来源判断 | “相关数据显示”“业内人士表示” |
+| 6 | 公式化“挑战与展望” | “尽管面临挑战，但未来前景广阔” |
 
-```
-/humanizer
+### 二、中文语言和句式模式
 
-Here's a sample of my writing for voice matching:
-[paste 2-3 paragraphs of your own writing]
+| # | 模式 | 常见表现 |
+|---|---|---|
+| 7 | 高频 AI 词汇堆叠 | “赋能、助力、深耕、打造、生态、闭环” |
+| 8 | 四字词和成语堆砌 | “凝心聚力、锐意进取、行稳致远” |
+| 9 | “不仅……更……”式伪递进 | “不仅是工具，更是引擎” |
+| 10 | 三连和多连排比 | “高效、智能、便捷”“降本、增效、提质” |
+| 11 | 同义词循环 | “平台/系统/工具/解决方案”反复换称呼 |
+| 12 | 虚假范围和夸张跨度 | “从战略到落地”“贯穿全周期” |
+| 13 | 主语缺失和被动腔 | “相关问题已得到有效处理” |
+| 14 | “通过……实现……”模板句 | “通过整合数据，实现智能化升级” |
+| 15 | “一体化 / 一站式 / 全方位”泛化 | “一站式全流程全场景服务” |
 
-Now humanize this text:
-[paste AI text to humanize]
-```
+### 三、风格和格式模式
 
-The skill will analyze your sentence rhythm, word choices, and quirks, then apply them to the rewrite instead of producing generic "clean" output.
+| # | 模式 | 常见表现 |
+|---|---|---|
+| 16 | 破折号、括号和冒号制造戏剧感 | “真正的问题是——” |
+| 17 | 粗体、编号和内联标题过多 | `**核心价值：**` 式列表 |
+| 18 | Emoji 装饰和过度符号化 | 🚀✨✅💡 用在标题或总结 |
+| 19 | 标题空泛和层级过满 | “核心价值”“未来展望”“深度解析” |
+| 20 | 金句化和口号化 | “未来已来”“让技术点亮未来” |
+| 21 | 过度工整的段落节奏 | 每段结构完全一致 |
 
-## Overview
+### 四、交流痕迹和 AI 对话残留
 
-Based on [Wikipedia's "Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) guide, maintained by WikiProject AI Cleanup. This comprehensive guide comes from observations of thousands of instances of AI-generated text.
+| # | 模式 | 常见表现 |
+|---|---|---|
+| 22 | Chatbot 式开场和结尾 | “当然可以”“希望对你有帮助” |
+| 23 | 知识截止和信息不足免责声明 | “截至我所知”“公开资料有限” |
+| 24 | 谄媚和过度礼貌 | “非常好的问题”“你说得完全正确” |
+| 25 | 说明书式引导 | “接下来我们将深入探讨” |
 
-The skill also includes a final "obviously AI generated" audit pass and a second rewrite, to catch lingering AI-isms in the first draft.
+### 五、填充、模糊和空泛结论
 
-### Key Insight from Wikipedia
+| # | 模式 | 常见表现 |
+|---|---|---|
+| 26 | 填充短语 | “在当前时代背景下”“值得注意的是” |
+| 27 | 过度限定和模糊判断 | “可能会在一定程度上产生潜在影响” |
+| 28 | 通用积极结论 | “未来可期”“前景广阔” |
+| 29 | 差异叙事和改动旁白 | “本次新增”“进一步优化原有流程” |
+| 30 | 伪全面和“正确废话” | “需要综合考虑多方面因素” |
 
-> "LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases."
+## 改写示例
 
-## 30 Patterns Detected (with Before/After Examples)
+### 示例 1：商业文案
 
-### Content Patterns
+**改写前：**
 
-| # | Pattern | Before | After |
-|---|---------|--------|-------|
-| 1 | **Significance inflation** | "marking a pivotal moment in the evolution of..." | "was established in 1989 to collect regional statistics" |
-| 2 | **Notability name-dropping** | "cited in NYT, BBC, FT, and The Hindu" | "In a 2024 NYT interview, she argued..." |
-| 3 | **Superficial -ing analyses** | "symbolizing... reflecting... showcasing..." | Remove or expand with actual sources |
-| 4 | **Promotional language** | "nestled within the breathtaking region" | "is a town in the Gonder region" |
-| 5 | **Vague attributions** | "Experts believe it plays a crucial role" | "according to a 2019 survey by..." |
-| 6 | **Formulaic challenges** | "Despite challenges... continues to thrive" | Specific facts about actual challenges |
+> 我们重磅推出全新升级的一站式服务平台，以极致体验全方位护航企业成长，助力企业实现降本、增效、提质。
 
-### Language Patterns
+**改写后：**
 
-| # | Pattern | Before | After |
-|---|---------|--------|-------|
-| 7 | **AI vocabulary** | "Actually... additionally... testament... landscape... showcasing" | "also... remain common" |
-| 8 | **Copula avoidance** | "serves as... features... boasts" | "is... has" |
-| 9 | **Negative parallelisms / tailing negations** | "It's not just X, it's Y", "..., no guessing" | State the point directly |
-| 10 | **Rule of three** | "innovation, inspiration, and insights" | Use natural number of items |
-| 11 | **Synonym cycling** | "protagonist... main character... central figure... hero" | "protagonist" (repeat when clearest) |
-| 12 | **False ranges** | "from the Big Bang to dark matter" | List topics directly |
-| 13 | **Passive voice / subjectless fragments** | "No configuration file needed" | Name the actor when it helps clarity |
+> 新平台把合同、发票和售后工单放在同一个后台。客户不用再分别登录三个系统。
 
-### Style Patterns
+### 示例 2：报告段落
 
-| # | Pattern | Before | After |
-|---|---------|--------|-------|
-| 14 | **Em/en dashes** | "institutions—not the people—yet this continues—" | Cut them: periods, commas, colons, or parentheses |
-| 15 | **Boldface overuse** | "**OKRs**, **KPIs**, **BMC**" | "OKRs, KPIs, BMC" |
-| 16 | **Inline-header lists** | "**Performance:** Performance improved" | Convert to prose |
-| 17 | **Title Case Headings** | "Strategic Negotiations And Partnerships" | "Strategic negotiations and partnerships" |
-| 18 | **Emojis** | "🚀 Launch Phase: 💡 Key Insight:" | Remove emojis |
-| 19 | **Curly quotes** | `said “the project”` | `said “the project”` |
-| 26 | **Hyphenated word pairs** | “cross-functional, data-driven, client-facing” | Drop hyphens on common word pairs |
-| 27 | **Persuasive authority tropes** | "At its core, what matters is..." | State the point directly |
-| 28 | **Signposting announcements** | "Let's dive in", "Here's what you need to know" | Start with the content |
-| 29 | **Fragmented headers** | "## Performance" + "Speed matters." | Let the heading do the work |
-| 30 | **Diff-anchored writing** | "This function was added to replace..." | Describe what it does, not what changed |
+**改写前：**
 
-### Communication Patterns
+> 在当前数字化浪潮不断加速的时代背景下，人工智能不仅是一项技术工具，更是推动企业高质量发展的关键引擎。
 
-| # | Pattern | Before | After |
-|---|---------|--------|-------|
-| 20 | **Chatbot artifacts** | "I hope this helps! Let me know if..." | Remove entirely |
-| 21 | **Cutoff disclaimers** | "While details are limited in available sources..." | Find sources or remove |
-| 22 | **Sycophantic tone** | "Great question! You're absolutely right!" | Respond directly |
+**改写后：**
 
-### Filler and Hedging
+> 企业引入 AI 后，最先变化的通常是客服和文档处理。它们流程固定，错误成本相对可控。
 
-| # | Pattern | Before | After |
-|---|---------|--------|-------|
-| 23 | **Filler phrases** | "In order to", "Due to the fact that" | "To", "Because" |
-| 24 | **Excessive hedging** | "could potentially possibly" | "may" |
-| 25 | **Generic conclusions** | "The future looks bright" | Specific plans or facts |
+### 示例 3：技术说明
 
-## Full Example
+**改写前：**
 
-**Before (AI-sounding):**
-> Great question! Here is an essay on this topic. I hope this helps!
->
-> AI-assisted coding serves as an enduring testament to the transformative potential of large language models, marking a pivotal moment in the evolution of software development. In today's rapidly evolving technological landscape, these groundbreaking tools—nestled at the intersection of research and practice—are reshaping how engineers ideate, iterate, and deliver, underscoring their vital role in modern workflows.
->
-> At its core, the value proposition is clear: streamlining processes, enhancing collaboration, and fostering alignment. It's not just about autocomplete; it's about unlocking creativity at scale, ensuring that organizations can remain agile while delivering seamless, intuitive, and powerful experiences to users. The tool serves as a catalyst. The assistant functions as a partner. The system stands as a foundation for innovation.
->
-> Industry observers have noted that adoption has accelerated from hobbyist experiments to enterprise-wide rollouts, from solo developers to cross-functional teams. The technology has been featured in The New York Times, Wired, and The Verge. Additionally, the ability to generate documentation, tests, and refactors showcases how AI can contribute to better outcomes, highlighting the intricate interplay between automation and human judgment.
->
-> - 💡 **Speed:** Code generation is significantly faster, reducing friction and empowering developers.
-> - 🚀 **Quality:** Output quality has been enhanced through improved training, contributing to higher standards.
-> - ✅ **Adoption:** Usage continues to grow, reflecting broader industry trends.
->
-> While specific details are limited based on available information, it could potentially be argued that these tools might have some positive effect. Despite challenges typical of emerging technologies—including hallucinations, bias, and accountability—the ecosystem continues to thrive. In order to fully realize this potential, teams must align with best practices.
->
-> In conclusion, the future looks bright. Exciting times lie ahead as we continue this journey toward excellence. Let me know if you’d like me to expand on any section!
+> 通过整合多源数据，实现业务流程的智能化升级，进一步构建高效协同的数字化生态闭环。
 
-**After (Humanized):**
-> AI coding assistants can speed up the boring parts of the job. They're great at boilerplate: config files and the little glue code you don't want to write. They can also help you sketch a test, but you still have to read it.
->
-> The dangerous part is how confident the suggestions look. I've accepted code that compiled and passed lint, then discovered later it missed the point because I stopped paying attention.
->
-> If you treat it like autocomplete and review every line, it's useful. If you use it to avoid thinking, it will help you ship bugs faster.
->
-> The only real backstop is tests. Without them, you're mostly judging vibes.
+**改写后：**
 
-## References
+> 系统会把 CRM、订单和售后工单的数据合在一张客户卡片里。销售不用再来回切系统。
 
-- [Wikipedia: Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) - Primary source
-- [WikiProject AI Cleanup](https://en.wikipedia.org/wiki/Wikipedia:WikiProject_AI_Cleanup) - Maintaining organization
+## 核心编辑原则
 
-## Version History
+1. **少说价值，多说事实**
+   - 不写：“具有重要意义”
+   - 如果原文或资料提供了真实数据，可以改写：“审批时间从 3 天缩到 4 小时”
 
-- **2.7.0** - Added pattern #30 (diff-anchored writing); made em/en dashes a hard cut rather than "overuse"; expanded #21 to cover speculative gap-filling ("maintains a low profile"). 30 patterns total.
-- **2.6.0** - Cleanup pass: consolidated the duplicated workflow sections, gated the personality guidance to content where voice is wanted, removed the model-fingerprinting subsection, and condensed the worked example. No change to the 29 patterns.
-- **2.5.1** - Added a passive-voice / subjectless-fragment rule, raising the total to 29 patterns
-- **2.5.0** - Added patterns for persuasive framing, signposting, and fragmented headers; expanded negative parallelisms to cover tailing negations; tightened wording around em dash overuse; fixed frontmatter wording to use "filler phrases"
-- **2.4.0** - Added voice calibration: match the user's personal writing style from samples
-- **2.3.0** - Added pattern #25: hyphenated word pair overuse
-- **2.2.0** - Added a final "obviously AI generated" audit + second-pass rewrite prompts
-- **2.1.1** - Fixed pattern #18 example (curly quotes vs straight quotes)
-- **2.1.0** - Added before/after examples for all 24 patterns
-- **2.0.0** - Complete rewrite based on raw Wikipedia article content
-- **1.0.0** - Initial release
+2. **少用套话，多用动作**
+   - 不写：“赋能业务增长”
+   - 改写：“自动生成补货单”
+
+3. **少铺垫，直接开始**
+   - 删除：“随着技术不断发展……”
+   - 直接写：“客服机器人先处理订单查询。”
+
+4. **少排比，保留重点**
+   - 不写：“高效、智能、便捷”
+   - 改写：“少填 6 个字段”
+
+5. **少圆滑，允许取舍**
+   - 不写：“适用于多种场景”
+   - 改写：“适合 20 人以内团队，再大需要权限分层。”
+
+## 输出格式
+
+默认输出：
+
+1. 改写后文本
+2. 主要修改说明
+
+如果用户只想要最终文本，Skill 会尽量减少解释。
+
+如果用户要求详细审阅，可以输出：
+
+1. 识别到的 AI 痕迹
+2. 改写后文本
+3. 为什么这样改
+4. 可选的更口语 / 更正式版本
+
+## 文件说明
+
+- `SKILL.md`：技能定义文件，包含完整规则和示例，是本项目的核心。
+- `README.md`：安装、使用和模式概览。
+- `AGENTS.md`：给 AI coding agents 的维护说明。
+- `LICENSE`：MIT License，沿用原项目许可。
+
+## 维护说明
+
+当修改 `SKILL.md` 时，请同步更新：
+
+- `README.md` 中的模式数量和模式表
+- `README.md` 的版本历史
+- `AGENTS.md` 中的维护约定
+- `SKILL.md` frontmatter 中的 `version`
+
+当前版本定义 **30 类中文 AI 写作痕迹**。
+
+## 版本历史
+
+- **3.0.0** - 中文专项改造：重写 SKILL.md 和 README.md，保留原版 skill 框架，新增 30 类中文 AI 写作痕迹，包括赋能体、四字词堆砌、公文腔、模板句式、空泛总结等。
+- **2.7.0** - 原英文版：增加 30 类英文 AI 写作模式和 draft → audit → final 流程。
 
 ## License
 
 MIT
+
+原始版权归原项目作者所有。本 fork 在 MIT License 下继续发布。
