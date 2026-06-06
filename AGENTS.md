@@ -20,9 +20,9 @@ This fork has been adapted for **Chinese AI-writing humanization**. It is not a 
 
 `SKILL.md` and `README.md` must stay in sync. When you change behavior or content:
 
-- **Patterns:** the skill currently defines **30 numbered Chinese AI-writing patterns**. If you add, remove, rename, or renumber any pattern, update:
+- **Patterns:** the skill currently defines **31 numbered Chinese AI-writing patterns**. If you add, remove, rename, or renumber any pattern, update:
   - the README pattern tables,
-  - the “30 类中文 AI 写作痕迹” wording,
+  - the “31 类中文 AI 写作痕迹” wording,
   - cross-references in `SKILL.md`,
   - the version history.
 - **Version:** `SKILL.md` frontmatter has a `version:` field and `README.md` has a “版本历史” section. Bump both together.
